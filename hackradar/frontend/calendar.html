@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>HackRadar &mdash; Calendar</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Inter:wght@400;500;600&family=IBM+Plex+Mono:wght@500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="css/style.css" />
+</head>
+<body>
+<div class="app-shell">
+  <aside class="sidebar">
+    <div class="brand"><div class="brand-mark"></div><div class="brand-name">HackRadar</div></div>
+    <nav class="nav-group">
+      <a class="nav-link" href="index.html">Dashboard</a>
+      <a class="nav-link" href="explore.html">Explore</a>
+      <a class="nav-link" href="closing-soon.html">Closing Soon</a>
+      <a class="nav-link" href="saved.html">Saved</a>
+      <a class="nav-link active" href="calendar.html">Calendar</a>
+      <a class="nav-link" href="contests.html">Coding Contests</a>
+      <a class="nav-link" href="profile.html">Profile</a>
+    </nav>
+    <div class="sidebar-footer">Phase 1 MVP &middot; mock data</div>
+  </aside>
+
+  <main class="main">
+    <div class="page-header">
+      <div>
+        <h1>🗓️ Calendar</h1>
+        <div class="sub">Registration deadlines, hackathon dates, and contests, in order.</div>
+      </div>
+    </div>
+    <div id="timeline"></div>
+  </main>
+</div>
+
+<script src="js/api.js"></script>
+<script src="js/format.js"></script>
+<script>
+async function init() {
+  const [hackData, contestData] = await Promise.all([
+    apiGet("/events?type=HACKATHON&pageSize=50"),
+    apiGet("/events?type=CONTEST&pageSize=50"),
+  ]);
+
+  const items = [];
+  for (const e of hackData.results) {
+    if (e.registrationDeadline) {
+      items.push({ date: e.registrationDeadline, label: "Registration deadline", title: e.title, id: e.id, kind: "deadline" });
+    }
+    items.push({ date: e.startDate, label: "Hackathon starts", title: e.title, id: e.id, kind: "event" });
+  }
+  for (const c of contestData.results) {
+    items.push({ date: c.startDate, label: `${c.source} contest`, title: c.title, id: c.id, kind: "contest" });
+  }
+  items.sort((a, b) => new Date(a.date) - new Date(b.date));
+  const upcoming = items.filter((i) => new Date(i.date).getTime() > Date.now());
+
+  const el = document.getElementById("timeline");
+  if (upcoming.length === 0) {
+    el.innerHTML = `<div class="empty-state"><h3>Nothing on the calendar</h3></div>`;
+    return;
+  }
+
+  const badgeColor = { deadline: "var(--red)", event: "var(--accent)", contest: "var(--blue)" };
+  el.innerHTML = `<div class="timeline">${upcoming
+    .map(
+      (i) => `
+      <div class="timeline-item">
+        <span class="label" style="color:${badgeColor[i.kind]}">${i.label}</span>
+        <span>${i.kind === "contest" ? escapeHtml(i.title) : `<a href="detail.html?id=${i.id}">${escapeHtml(i.title)}</a>`}</span>
+        <span class="val">${formatDateTime(i.date)}</span>
+      </div>`
+    )
+    .join("")}</div>`;
+}
+function escapeHtml(str) {
+  const div = document.createElement("div");
+  div.textContent = str ?? "";
+  return div.innerHTML;
+}
+init().catch((err) => {
+  console.error(err);
+  document.getElementById("timeline").innerHTML = `<div class="empty-state"><h3>Couldn't load</h3>Check that the backend server is running.</div>`;
+});
+</script>
+</body>
+</html>

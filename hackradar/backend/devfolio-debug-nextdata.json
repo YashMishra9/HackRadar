@@ -1,0 +1,20 @@
+{
+  "props": {
+    "pageProps": {
+      "filterType": "application_open"
+    },
+    "__N_SSG": true
+  },
+  "page": "/hackathons/[hackathonStatus]",
+  "query": {
+    "hackathonStatus": "open"
+  },
+  "buildId": "-JfxnbiJWWIodOw5n-5zF",
+  "isFallback": false,
+  "isExperimentalCompile": false,
+  "dynamicIds": [
+    77009
+  ],
+  "gsp": true,
+  "scriptLoader": []
+}

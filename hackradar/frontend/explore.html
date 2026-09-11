@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>HackRadar &mdash; Explore Hackathons</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Inter:wght@400;500;600&family=IBM+Plex+Mono:wght@500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="css/style.css" />
+</head>
+<body>
+<div class="app-shell">
+  <aside class="sidebar">
+    <div class="brand">
+      <div class="brand-mark"></div>
+      <div class="brand-name">HackRadar</div>
+    </div>
+    <nav class="nav-group">
+      <a class="nav-link" href="index.html">Dashboard</a>
+      <a class="nav-link active" href="explore.html">Explore</a>
+      <a class="nav-link" href="closing-soon.html">Closing Soon</a>
+      <a class="nav-link" href="saved.html">Saved</a>
+      <a class="nav-link" href="calendar.html">Calendar</a>
+      <a class="nav-link" href="contests.html">Coding Contests</a>
+      <a class="nav-link" href="profile.html">Profile</a>
+    </nav>
+    <div class="sidebar-footer">Phase 1 MVP &middot; mock data</div>
+  </aside>
+
+  <main class="main">
+    <div class="page-header">
+      <div>
+        <h1>Explore Hackathons</h1>
+        <div class="sub">Search and filter every hackathon on the radar.</div>
+      </div>
+    </div>
+
+    <div class="search-bar">
+      <input type="text" id="search-input" placeholder="Search by name, organizer, or theme&hellip;" />
+      <select class="control" id="sort-select">
+        <option value="relevance">Sort: Relevance</option>
+        <option value="deadline">Sort: Deadline</option>
+        <option value="prize">Sort: Prize pool</option>
+        <option value="newest">Sort: Newest</option>
+      </select>
+    </div>
+
+    <div class="explore-layout">
+      <aside class="filters">
+        <div class="filter-group">
+          <h4>Mode</h4>
+          <div class="filter-options" id="filter-mode">
+            <label class="filter-chip"><input type="radio" name="mode" value="" checked /> Any</label>
+            <label class="filter-chip"><input type="radio" name="mode" value="ONLINE" /> Online</label>
+            <label class="filter-chip"><input type="radio" name="mode" value="OFFLINE" /> Offline</label>
+            <label class="filter-chip"><input type="radio" name="mode" value="HYBRID" /> Hybrid</label>
+          </div>
+        </div>
+
+        <div class="filter-group">
+          <h4>Status</h4>
+          <div class="filter-options" id="filter-status">
+            <label class="filter-chip"><input type="radio" name="status" value="" checked /> Any</label>
+            <label class="filter-chip"><input type="radio" name="status" value="OPEN" /> Registration open</label>
+            <label class="filter-chip"><input type="radio" name="status" value="CLOSING_SOON" /> Closing soon</label>
+          </div>
+        </div>
+
+        <div class="filter-group">
+          <h4>Theme</h4>
+          <div class="filter-options" id="filter-tags"></div>
+        </div>
+
+        <div class="filter-group">
+          <h4>Location</h4>
+          <input type="text" class="control" id="filter-location" placeholder="City name&hellip;" />
+        </div>
+      </aside>
+
+      <div>
+        <div class="sort-bar">
+          <span class="result-count" id="result-count"></span>
+        </div>
+        <div class="card-grid" id="results"></div>
+      </div>
+    </div>
+  </main>
+</div>
+
+<script src="js/api.js"></script>
+<script src="js/format.js"></script>
+<script src="js/cards.js"></script>
+<script src="js/explore.js"></script>
+</body>
+</html>

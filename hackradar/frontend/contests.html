@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>HackRadar &mdash; Coding Contests</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Inter:wght@400;500;600&family=IBM+Plex+Mono:wght@500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="css/style.css" />
+</head>
+<body>
+<div class="app-shell">
+  <aside class="sidebar">
+    <div class="brand"><div class="brand-mark"></div><div class="brand-name">HackRadar</div></div>
+    <nav class="nav-group">
+      <a class="nav-link" href="index.html">Dashboard</a>
+      <a class="nav-link" href="explore.html">Explore</a>
+      <a class="nav-link" href="closing-soon.html">Closing Soon</a>
+      <a class="nav-link" href="saved.html">Saved</a>
+      <a class="nav-link" href="calendar.html">Calendar</a>
+      <a class="nav-link active" href="contests.html">Coding Contests</a>
+      <a class="nav-link" href="profile.html">Profile</a>
+    </nav>
+    <div class="sidebar-footer">Phase 1 MVP &middot; mock data</div>
+  </aside>
+
+  <main class="main">
+    <div class="page-header">
+      <div>
+        <h1>💻 Coding Contests</h1>
+        <div class="sub">Codeforces, CodeChef, LeetCode, AtCoder and GeeksforGeeks &mdash; a secondary view alongside hackathons.</div>
+      </div>
+    </div>
+    <div id="contest-list"></div>
+  </main>
+</div>
+
+<script src="js/api.js"></script>
+<script src="js/format.js"></script>
+<script>
+async function init() {
+  const { results } = await apiGet("/events?type=CONTEST&pageSize=50&sort=deadline");
+  const el = document.getElementById("contest-list");
+  if (results.length === 0) {
+    el.innerHTML = `<div class="empty-state"><h3>No contests scheduled</h3></div>`;
+    return;
+  }
+  el.innerHTML = results
+    .map(
+      (c) => `
+      <div class="contest-row">
+        <div>
+          <div style="font-weight:600;">${escapeHtml(c.title)}</div>
+          <div class="platform">${escapeHtml(c.source)} \u00b7 ${c.difficulty || "Rated"} \u00b7 ${formatDateTime(c.startDate)} \u00b7 ${c.durationMinutes ? c.durationMinutes + " min" : ""}</div>
+        </div>
+        <a class="btn small ghost" href="${c.registrationUrl}" target="_blank" rel="noopener">Open on ${escapeHtml(c.source)}</a>
+      </div>`
+    )
+    .join("");
+}
+function escapeHtml(str) {
+  const div = document.createElement("div");
+  div.textContent = str ?? "";
+  return div.innerHTML;
+}
+init().catch((err) => {
+  console.error(err);
+  document.getElementById("contest-list").innerHTML = `<div class="empty-state"><h3>Couldn't load</h3>Check that the backend server is running.</div>`;
+});
+</script>
+</body>
+</html>

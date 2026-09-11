@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>HackRadar &mdash; Profile</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Inter:wght@400;500;600&family=IBM+Plex+Mono:wght@500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="css/style.css" />
+<style>
+  .form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; max-width: 640px; }
+  .form-grid.full { grid-template-columns: 1fr; }
+  .field { display: flex; flex-direction: column; gap: 6px; }
+  .field label { font-size: 12.5px; color: var(--text-muted); }
+  .field input, .field select { width: 100%; }
+  .tag-toggle-group { display: flex; flex-wrap: wrap; gap: 8px; }
+  .tag-toggle {
+    padding: 6px 12px; border-radius: var(--radius-sm); border: 1px solid var(--border);
+    background: var(--surface); color: var(--text-muted); font-size: 13px; cursor: pointer;
+  }
+  .tag-toggle.active { background: var(--accent-dim); border-color: var(--accent); color: var(--accent); }
+  .save-bar { margin-top: 24px; display: flex; align-items: center; gap: 12px; }
+  .save-msg { font-size: 13px; color: var(--green); opacity: 0; transition: opacity 0.2s; }
+  .save-msg.show { opacity: 1; }
+</style>
+</head>
+<body>
+<div class="app-shell">
+  <aside class="sidebar">
+    <div class="brand"><div class="brand-mark"></div><div class="brand-name">HackRadar</div></div>
+    <nav class="nav-group">
+      <a class="nav-link" href="index.html">Dashboard</a>
+      <a class="nav-link" href="explore.html">Explore</a>
+      <a class="nav-link" href="closing-soon.html">Closing Soon</a>
+      <a class="nav-link" href="saved.html">Saved</a>
+      <a class="nav-link" href="calendar.html">Calendar</a>
+      <a class="nav-link" href="contests.html">Coding Contests</a>
+      <a class="nav-link active" href="profile.html">Profile</a>
+    </nav>
+    <div class="sidebar-footer">Phase 1 MVP &middot; mock data</div>
+  </aside>
+
+  <main class="main">
+    <div class="page-header">
+      <div>
+        <h1>Your Profile</h1>
+        <div class="sub">This drives your match scores and recommendations.</div>
+      </div>
+    </div>
+
+    <div class="detail-block" style="max-width:680px;">
+      <h3>Basic</h3>
+      <div class="form-grid">
+        <div class="field"><label>Name</label><input class="control" id="f-name" /></div>
+        <div class="field"><label>College</label><input class="control" id="f-college" /></div>
+        <div class="field"><label>Year</label><input class="control" id="f-year" /></div>
+        <div class="field"><label>City</label><input class="control" id="f-city" /></div>
+      </div>
+    </div>
+
+    <div class="detail-block" style="max-width:680px;">
+      <h3>Skills</h3>
+      <div class="tag-toggle-group" id="skills-toggle"></div>
+    </div>
+
+    <div class="detail-block" style="max-width:680px;">
+      <h3>Interests</h3>
+      <div class="tag-toggle-group" id="interests-toggle"></div>
+    </div>
+
+    <div class="detail-block" style="max-width:680px;">
+      <h3>Preferences</h3>
+      <div class="form-grid">
+        <div class="field">
+          <label>Mode preference</label>
+          <select class="control" id="f-mode">
+            <option value="ANY">Online / Offline / Hybrid</option>
+            <option value="ONLINE">Online only</option>
+            <option value="OFFLINE">Offline only</option>
+            <option value="HYBRID">Hybrid only</option>
+          </select>
+        </div>
+        <div class="field">
+          <label>Experience level</label>
+          <select class="control" id="f-level">
+            <option value="BEGINNER">Beginner</option>
+            <option value="INTERMEDIATE">Intermediate</option>
+            <option value="ADVANCED">Advanced</option>
+          </select>
+        </div>
+        <div class="field">
+          <label>Preferred team size</label>
+          <input class="control" type="number" min="1" max="8" id="f-teamsize" />
+        </div>
+      </div>
+    </div>
+
+    <div class="save-bar">
+      <button class="btn primary" id="save-btn">Save profile</button>
+      <span class="save-msg" id="save-msg">Saved &mdash; your matches have been recalculated.</span>
+    </div>
+  </main>
+</div>
+
+<script src="js/api.js"></script>
+<script>
+const SKILL_OPTIONS = ["React", "Node.js", "Python", "C++", "Machine Learning", "UI/UX", "Solidity", "DSA", "Cybersecurity"];
+const INTEREST_OPTIONS = ["AI/ML", "Web Development", "Cybersecurity", "Blockchain/Web3", "FinTech", "Healthcare", "Open Innovation", "Beginner Friendly"];
+
+let selectedSkills = new Set();
+let selectedInterests = new Set();
+
+function renderToggleGroup(containerId, options, selectedSet) {
+  const el = document.getElementById(containerId);
+  el.innerHTML = options
+    .map((opt) => `<button type="button" class="tag-toggle ${selectedSet.has(opt) ? "active" : ""}" data-val="${opt}">${opt}</button>`)
+    .join("");
+  el.querySelectorAll(".tag-toggle").forEach((btn) => {
+    btn.addEventListener("click", () => {
+      const val = btn.getAttribute("data-val");
+      if (selectedSet.has(val)) selectedSet.delete(val);
+      else selectedSet.add(val);
+      btn.classList.toggle("active");
+    });
+  });
+}
+
+async function init() {
+  const profile = await apiGet("/profile");
+  document.getElementById("f-name").value = profile.name || "";
+  document.getElementById("f-college").value = profile.college || "";
+  document.getElementById("f-year").value = profile.year || "";
+  document.getElementById("f-city").value = profile.city || "";
+  document.getElementById("f-mode").value = profile.modePreference || "ANY";
+  document.getElementById("f-level").value = profile.experienceLevel || "BEGINNER";
+  document.getElementById("f-teamsize").value = profile.preferredTeamSize || "";
+
+  selectedSkills = new Set(profile.skills || []);
+  selectedInterests = new Set(profile.interests || []);
+  renderToggleGroup("skills-toggle", SKILL_OPTIONS, selectedSkills);
+  renderToggleGroup("interests-toggle", INTEREST_OPTIONS, selectedInterests);
+
+  document.getElementById("save-btn").addEventListener("click", async () => {
+    await apiPut("/profile", {
+      name: document.getElementById("f-name").value,
+      college: document.getElementById("f-college").value,
+      year: document.getElementById("f-year").value,
+      city: document.getElementById("f-city").value,
+      state: profile.state,
+      skills: Array.from(selectedSkills),
+      interests: Array.from(selectedInterests),
+      modePreference: document.getElementById("f-mode").value,
+      experienceLevel: document.getElementById("f-level").value,
+      preferredTeamSize: parseInt(document.getElementById("f-teamsize").value, 10) || null,
+    });
+    const msg = document.getElementById("save-msg");
+    msg.classList.add("show");
+    setTimeout(() => msg.classList.remove("show"), 2500);
+  });
+}
+init().catch((err) => console.error(err));
+</script>
+</body>
+</html>

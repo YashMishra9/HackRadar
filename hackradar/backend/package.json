@@ -1,0 +1,21 @@
+{
+  "name": "hackradar-backend",
+  "version": "1.0.0",
+  "description": "HackRadar API - hackathon & contest discovery backend",
+  "main": "src/server.js",
+  "type": "commonjs",
+  "scripts": {
+    "debug:devfolio": "node src/debug-devfolio.js",
+    "debug:unstop": "node src/debug-unstop.js",
+    "dev": "node src/server.js",
+    "seed": "node src/seed.js"
+  },
+  "dependencies": {
+    "cors": "^2.8.5",
+    "express": "^4.19.2",
+    "puppeteer": "^25.10.0"
+  },
+  "allowScripts": {
+    "puppeteer@25.10.0": true
+  }
+}

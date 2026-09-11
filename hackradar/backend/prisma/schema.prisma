@@ -1,0 +1,93 @@
+// HackRadar data model
+// NOTE: using SQLite for zero-setup local development.
+// To move to Postgres later: change provider to "postgresql",
+// set DATABASE_URL to your Postgres connection string, and re-run
+// `npx prisma migrate dev`. Nothing else in the codebase needs to change.
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+// ---------------------------------------------------------------
+// EVENT: the normalized model every source (Unstop, Devfolio, HackerEarth,
+// college pages, Codeforces, etc.) maps into. "type" distinguishes
+// HACKATHON from CONTEST so the same table/API can serve both,
+// while the product treats hackathons as primary.
+// ---------------------------------------------------------------
+model Event {
+  id                   String   @id @default(cuid())
+
+  title                String
+  organizer            String
+  source               String            // e.g. "Unstop", "Devfolio", "Codeforces"
+  sourceUrl            String?
+  type                 String            // "HACKATHON" | "CONTEST"
+  description          String
+  imageUrl             String?
+
+  startDate            DateTime
+  endDate              DateTime
+  registrationDeadline DateTime?
+
+  location             String            // city name or "Online"
+  mode                 String            // "ONLINE" | "OFFLINE" | "HYBRID"
+
+  eligibility          String            // free text, e.g. "College students, all years"
+  teamSizeMin          Int?
+  teamSizeMax          Int?
+
+  prizePool            Int?              // in INR, null if unknown/none
+  tags                 String            // comma-separated theme tags e.g. "AI/ML,Web Dev"
+  skills               String            // comma-separated relevant skills
+
+  registrationUrl      String
+  status               String   @default("UPCOMING") // UPCOMING | OPEN | CLOSING_SOON | CLOSED
+
+  // contest-only fields (null for hackathons)
+  difficulty           String?
+  durationMinutes      Int?
+
+  createdAt            DateTime @default(now())
+  updatedAt            DateTime @updatedAt
+
+  savedBy              SavedEvent[]
+}
+
+// A minimal user profile so recommendation/match scoring has something
+// to work against in Phase 1, ahead of full auth in Phase 2.
+model UserProfile {
+  id               String   @id @default(cuid())
+  name             String
+  college          String?
+  year             String?
+  city             String?
+  state            String?
+
+  skills           String   // comma-separated
+  interests        String   // comma-separated
+  modePreference   String   @default("ANY") // ONLINE | OFFLINE | HYBRID | ANY
+  experienceLevel  String   @default("BEGINNER") // BEGINNER | INTERMEDIATE | ADVANCED
+  preferredTeamSize Int?
+
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
+
+  savedEvents      SavedEvent[]
+}
+
+model SavedEvent {
+  id        String      @id @default(cuid())
+  userId    String
+  eventId   String
+  savedAt   DateTime    @default(now())
+
+  user      UserProfile @relation(fields: [userId], references: [id])
+  event     Event       @relation(fields: [eventId], references: [id])
+
+  @@unique([userId, eventId])
+}

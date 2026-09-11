@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>HackRadar &mdash; Dashboard</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Inter:wght@400;500;600&family=IBM+Plex+Mono:wght@500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="css/style.css" />
+</head>
+<body>
+<div class="app-shell">
+  <aside class="sidebar">
+    <div class="brand">
+      <div class="brand-mark"></div>
+      <div class="brand-name">HackRadar</div>
+    </div>
+    <nav class="nav-group">
+      <a class="nav-link active" href="index.html">Dashboard</a>
+      <a class="nav-link" href="explore.html">Explore</a>
+      <a class="nav-link" href="closing-soon.html">Closing Soon</a>
+      <a class="nav-link" href="saved.html">Saved</a>
+      <a class="nav-link" href="calendar.html">Calendar</a>
+      <a class="nav-link" href="contests.html">Coding Contests</a>
+      <a class="nav-link" href="profile.html">Profile</a>
+    </nav>
+    <div class="sidebar-footer">Phase 1 MVP &middot; mock data</div>
+  </aside>
+
+  <main class="main">
+    <div class="page-header">
+      <div>
+        <h1 id="greeting">Good morning 👋</h1>
+        <div class="sub">Here's what's worth your attention today.</div>
+      </div>
+    </div>
+
+    <div class="stat-row" id="stat-row"></div>
+
+    <div class="section">
+      <div class="section-head">
+        <h2>🔥 Closing Soon</h2>
+        <a class="link" href="closing-soon.html">View all</a>
+      </div>
+      <div id="closing-soon-list"></div>
+    </div>
+
+    <div class="section">
+      <div class="section-head">
+        <h2>✨ Top Matches For You</h2>
+        <a class="link" href="explore.html">Explore all</a>
+      </div>
+      <div class="card-grid" id="top-matches"></div>
+    </div>
+
+    <div class="section">
+      <div class="section-head">
+        <h2>📍 Hackathons Across India</h2>
+      </div>
+      <div class="city-list" id="city-list"></div>
+    </div>
+
+    <div class="section">
+      <div class="section-head">
+        <h2>💻 Coding Contests</h2>
+        <a class="link" href="contests.html">View all</a>
+      </div>
+      <div id="contest-preview"></div>
+    </div>
+  </main>
+</div>
+
+<script src="js/api.js"></script>
+<script src="js/format.js"></script>
+<script src="js/cards.js"></script>
+<script src="js/home.js"></script>
+</body>
+</html>

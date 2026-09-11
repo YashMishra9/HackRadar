@@ -1,0 +1,218 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>HackRadar &mdash; Hackathon Details</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Inter:wght@400;500;600&family=IBM+Plex+Mono:wght@500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="css/style.css" />
+<style>
+  .tag-row { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 4px; }
+  .team-form-row { display: flex; gap: 8px; margin-bottom: 8px; }
+  .team-form-row input { flex: 1; }
+  .team-need-list { display: flex; flex-direction: column; gap: 6px; margin: 10px 0; }
+  .team-need-item { display: flex; justify-content: space-between; align-items: center; background: var(--surface-raised); border: 1px solid var(--border); border-radius: var(--radius-sm); padding: 6px 10px; font-size: 13px; }
+  .remove-need { color: var(--text-faint); cursor: pointer; background: none; border: none; font-size: 14px; }
+</style>
+</head>
+<body>
+<div class="app-shell">
+  <aside class="sidebar">
+    <div class="brand"><div class="brand-mark"></div><div class="brand-name">HackRadar</div></div>
+    <nav class="nav-group">
+      <a class="nav-link" href="index.html">Dashboard</a>
+      <a class="nav-link" href="explore.html">Explore</a>
+      <a class="nav-link" href="closing-soon.html">Closing Soon</a>
+      <a class="nav-link" href="saved.html">Saved</a>
+      <a class="nav-link" href="calendar.html">Calendar</a>
+      <a class="nav-link" href="contests.html">Coding Contests</a>
+      <a class="nav-link" href="profile.html">Profile</a>
+    </nav>
+    <div class="sidebar-footer">Phase 1 MVP &middot; mock data</div>
+  </aside>
+
+  <main class="main" id="main-content">
+    <div class="empty-state">Loading&hellip;</div>
+  </main>
+</div>
+
+<script src="js/api.js"></script>
+<script src="js/cards.js"></script>
+<script src="js/format.js"></script>
+<script>
+function escapeHtml(str) {
+  const div = document.createElement("div");
+  div.textContent = str ?? "";
+  return div.innerHTML;
+}
+
+function getEventId() {
+  return new URLSearchParams(window.location.search).get("id");
+}
+
+async function init() {
+  const id = getEventId();
+  const main = document.getElementById("main-content");
+  if (!id) {
+    main.innerHTML = `<div class="empty-state"><h3>No hackathon selected</h3></div>`;
+    return;
+  }
+
+  const [event, savedIds] = await Promise.all([apiGet(`/events/${id}`), getSavedIds()]);
+  const isSaved = savedIds.has(event.id);
+  const deadline = formatDeadline(event.registrationDeadline);
+  const prize = formatPrize(event.prizePool, event.prizeCurrency);
+
+  main.innerHTML = `
+    <div class="detail-header">
+      <div class="top-row">
+        <div>
+          <h1>${escapeHtml(event.title)}</h1>
+          <div class="org">${escapeHtml(event.organizer)} \u00b7 via ${escapeHtml(event.source)}${event.source === "Devpost" ? ' <span class="live-badge">LIVE</span>' : ""}</div>
+        </div>
+        <div class="match-badge" style="font-size:14px;padding:6px 12px;">${event.matchScore}% match</div>
+      </div>
+
+      <div class="detail-grid">
+        <div class="detail-stat"><div class="k">Registration closes</div><div class="v">${formatDateTime(event.registrationDeadline)}</div></div>
+        <div class="detail-stat"><div class="k">Event dates</div><div class="v">${formatDateRange(event.startDate, event.endDate)}</div></div>
+        <div class="detail-stat"><div class="k">Mode</div><div class="v">${modeLabel(event.mode)}</div></div>
+        <div class="detail-stat"><div class="k">Location</div><div class="v">${escapeHtml(event.location)}</div></div>
+        <div class="detail-stat"><div class="k">Team size</div><div class="v">${teamSizeLabel(event.teamSizeMin, event.teamSizeMax)}</div></div>
+        <div class="detail-stat"><div class="k">Prize pool</div><div class="v">${prize || "Not disclosed"}</div></div>
+        <div class="detail-stat"><div class="k">Status</div><div class="v"><span class="deadline-tag ${deadline.cls}">${deadline.text}</span></div></div>
+        <div class="detail-stat"><div class="k">Source</div><div class="v">${escapeHtml(event.source)}</div></div>
+      </div>
+
+      <div class="detail-actions">
+        <a class="btn primary" href="${event.registrationUrl}" target="_blank" rel="noopener">Register Now</a>
+        <button class="btn save ${isSaved ? "saved" : ""}" data-save-id="${event.id}">${isSaved ? "\u2665 Saved" : "\u2661 Save"}</button>
+        <a class="btn" href="calendar.html">Add to Calendar</a>
+      </div>
+    </div>
+
+    <div class="detail-body">
+      <div>
+        <div class="detail-block">
+          <h3>About</h3>
+          <p>${escapeHtml(event.description)}</p>
+        </div>
+
+        <div class="detail-block">
+          <h3>Eligibility</h3>
+          <p>${escapeHtml(event.eligibility)}</p>
+        </div>
+
+        <div class="detail-block">
+          <h3>Themes</h3>
+          <div class="tag-row">${event.tags.map((t) => `<span class="pill">${escapeHtml(t)}</span>`).join("")}</div>
+        </div>
+
+        <div class="detail-block">
+          <h3>Relevant skills</h3>
+          <div class="tag-row">${event.skills.map((s) => `<span class="pill">${escapeHtml(s)}</span>`).join("")}</div>
+        </div>
+
+        <div class="detail-block">
+          <h3>Find Teammates</h3>
+          <p style="margin-bottom:10px;color:var(--text-muted);font-size:13px;">List the roles you still need for this hackathon. Saved locally on this device for now &mdash; a shared team board is a Phase 3 feature.</p>
+          <div class="team-need-list" id="team-need-list"></div>
+          <div class="team-form-row">
+            <input class="control" id="team-need-input" placeholder="e.g. 1 ML Engineer" />
+            <button class="btn" id="team-need-add">Add</button>
+          </div>
+        </div>
+      </div>
+
+      <div>
+        <div class="detail-block">
+          <h3>Why this is relevant to you</h3>
+          <div class="score-ring-wrap">
+            <div class="score-num">${event.matchScore}</div>
+            <div class="score-explain">${escapeHtml(event.matchExplanation)}</div>
+          </div>
+        </div>
+
+        <div class="detail-block">
+          <h3>Important dates</h3>
+          <div class="timeline" style="grid-template-columns:1fr;">
+            <div class="timeline-item" style="grid-template-columns:1fr auto;"><span class="label">Registration deadline</span><span class="val">${formatDateTime(event.registrationDeadline)}</span></div>
+            <div class="timeline-item" style="grid-template-columns:1fr auto;"><span class="label">Hackathon starts</span><span class="val">${formatDateTime(event.startDate)}</span></div>
+            <div class="timeline-item" style="grid-template-columns:1fr auto;"><span class="label">Hackathon ends</span><span class="val">${formatDateTime(event.endDate)}</span></div>
+          </div>
+        </div>
+
+        <div class="detail-block">
+          <h3>Prize pool</h3>
+          <p>${prize ? `${prize} across winning teams. Exact breakdown announced closer to the event.` : "Not disclosed by the organizer yet."}</p>
+        </div>
+      </div>
+    </div>
+  `;
+
+  wireSaveButtons(document.getElementById("main-content"));
+  initTeamFinder(event.id);
+}
+
+function teamFinderKey(eventId) {
+  return `hackradar_team_needs_${eventId}`;
+}
+
+function initTeamFinder(eventId) {
+  const listEl = document.getElementById("team-need-list");
+  const input = document.getElementById("team-need-input");
+  const addBtn = document.getElementById("team-need-add");
+
+  function load() {
+    try {
+      return JSON.parse(localStorage.getItem(teamFinderKey(eventId)) || "[]");
+    } catch {
+      return [];
+    }
+  }
+  function save(needs) {
+    localStorage.setItem(teamFinderKey(eventId), JSON.stringify(needs));
+  }
+  function render() {
+    const needs = load();
+    if (needs.length === 0) {
+      listEl.innerHTML = `<div style="color:var(--text-faint);font-size:13px;">No roles added yet.</div>`;
+      return;
+    }
+    listEl.innerHTML = needs
+      .map(
+        (n, i) => `<div class="team-need-item"><span>${escapeHtml(n)}</span><button class="remove-need" data-idx="${i}">\u2715</button></div>`
+      )
+      .join("");
+    listEl.querySelectorAll(".remove-need").forEach((btn) =>
+      btn.addEventListener("click", () => {
+        const needs2 = load();
+        needs2.splice(parseInt(btn.getAttribute("data-idx"), 10), 1);
+        save(needs2);
+        render();
+      })
+    );
+  }
+  addBtn.addEventListener("click", () => {
+    const val = input.value.trim();
+    if (!val) return;
+    const needs = load();
+    needs.push(val);
+    save(needs);
+    input.value = "";
+    render();
+  });
+  input.addEventListener("keydown", (e) => {
+    if (e.key === "Enter") addBtn.click();
+  });
+  render();
+}
+
+init().catch((err) => {
+  console.error(err);
+  document.getElementById("main-content").innerHTML = `<div class="empty-state"><h3>Couldn't load this hackathon</h3>Check that the backend server is running.</div>`;
+});
+</script>
+</body>
+</html>
