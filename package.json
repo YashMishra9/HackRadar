@@ -1,5 +1,16 @@
 {
+  "name": "hackradar",
+  "version": "1.0.0",
+  "private": true,
+  "scripts": {
+    "start": "node hackradar/backend/src/server.js"
+  },
   "dependencies": {
+    "cors": "^2.8.5",
+    "express": "^4.19.2",
     "puppeteer": "^25.10.0"
+  },
+  "engines": {
+    "node": "24.x"
   }
 }
