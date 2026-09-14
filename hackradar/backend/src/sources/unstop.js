@@ -61,9 +61,9 @@ function extractCards() {
 // repeatedly and collect cards after each click until the arrow disables
 // or the list stops changing.
 async function scrapeWithPagination(page, status, { maxPages = 40 } = {}) {
-  await page.goto(`https://unstop.com/hackathons?oppstatus=${status}`, {
-    waitUntil: "networkidle2",
-    timeout: 45000,
+    await page.goto(`https://unstop.com/hackathons?oppstatus=${status}`, {
+    waitUntil: "domcontentloaded", // don't wait for network to go fully quiet — trackers never stop firing
+    timeout: 60000,
   });
   await new Promise((r) => setTimeout(r, 2500));
 
