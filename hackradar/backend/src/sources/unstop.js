@@ -62,10 +62,19 @@ function extractCards() {
 // or the list stops changing.
 async function scrapeWithPagination(page, status, { maxPages = 40 } = {}) {
     await page.goto(`https://unstop.com/hackathons?oppstatus=${status}`, {
-    waitUntil: "domcontentloaded", // don't wait for network to go fully quiet — trackers never stop firing
+    waitUntil: "domcontentloaded",
     timeout: 60000,
   });
-  await new Promise((r) => setTimeout(r, 2500));
+
+  // Wait for actual hackathon cards to appear in the DOM — this is the real
+  // signal the Angular app has finished rendering, unlike domcontentloaded
+  // (fires on raw HTML) or networkidle2 (never fires due to trackers).
+  try {
+    await page.waitForSelector('a.item[href^="/hackathons/"]', { timeout: 30000 });
+  } catch {
+    console.log(`[unstop] status=${status}: no cards appeared within 30s`);
+  }
+  await new Promise((r) => setTimeout(r, 1500));
 
   const collected = new Map();
 
