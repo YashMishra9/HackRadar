@@ -39,7 +39,9 @@ async function refreshDevpost() {
 
 async function refreshUnstop() {
   try {
-    const hackathons = await fetchUnstopHackathons();
+    const timeout = (ms) =>
+      new Promise((_, reject) => setTimeout(() => reject(new Error(`Unstop refresh exceeded ${ms}ms hard limit`)), ms));
+    const hackathons = await Promise.race([fetchUnstopHackathons(), timeout(8 * 60 * 1000)]);
     db.exec("DELETE FROM events WHERE source = 'Unstop'");
 
     const insertStmt = db.prepare(`

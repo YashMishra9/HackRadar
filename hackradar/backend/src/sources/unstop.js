@@ -99,14 +99,14 @@ async function scrapeWithPagination(page, status, { maxPages = 40 } = {}) {
 }
 
 async function fetchUnstopHackathons() {
-    const browser = await puppeteer.launch({
+      const browser = await puppeteer.launch({
     headless: "new",
+    protocolTimeout: 120000,
     args: [
       "--no-sandbox",
       "--disable-setuid-sandbox",
       "--disable-dev-shm-usage",
       "--disable-gpu",
-      "--single-process",
     ],
   });
   const seen = new Map();
