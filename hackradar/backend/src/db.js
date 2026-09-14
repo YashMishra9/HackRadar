@@ -8,7 +8,7 @@ const { DatabaseSync } = require("node:sqlite");
 // your exact Node version — a common source of setup pain. Zero npm
 // dependency for the database layer now.
 
-const DB_PATH = path.join(__dirname, "..", "dev.db");
+const DB_PATH = process.env.DB_PATH || path.join(__dirname, "..", "dev.db");
 const db = new DatabaseSync(DB_PATH);
 
 db.exec("PRAGMA journal_mode = WAL;");
