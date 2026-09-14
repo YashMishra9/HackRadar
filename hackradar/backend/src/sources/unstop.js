@@ -90,14 +90,33 @@ async function scrapeWithPagination(page, status, { maxPages = 40 } = {}) {
 }
 
 async function fetchUnstopHackathons() {
-  const browser = await puppeteer.launch({ headless: "new" });
+    const browser = await puppeteer.launch({
+    headless: "new",
+    args: [
+      "--no-sandbox",
+      "--disable-setuid-sandbox",
+      "--disable-dev-shm-usage",
+      "--disable-gpu",
+      "--single-process",
+    ],
+  });
   const seen = new Map();
   try {
-    const page = await browser.newPage();
+        const page = await browser.newPage();
     await page.setUserAgent(
       "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0 Safari/537.36"
     );
-    await page.setViewport({ width: 1280, height: 2000 }); // taller viewport, fewer scroll cycles needed
+    await page.setViewport({ width: 1280, height: 2000 });
+
+    await page.setRequestInterception(true);
+    page.on("request", (req) => {
+      const type = req.resourceType();
+      if (["image", "font", "stylesheet", "media"].includes(type)) {
+        req.abort();
+      } else {
+        req.continue();
+      }
+    });
 
     for (const status of ["open", "upcoming"]) {
       const cards = await scrapeWithPagination(page, status);
