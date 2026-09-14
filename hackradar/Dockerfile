@@ -9,7 +9,7 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
 WORKDIR /app
 COPY backend/package*.json ./backend/
 RUN cd backend && npm install
-RUN cd backend && npx puppeteer browsers clear && npx puppeteer browsers install chrome
+RUN rm -rf /root/.cache/puppeteer && cd backend && npx puppeteer browsers install chrome
 COPY backend ./backend
 COPY frontend ./frontend
 
